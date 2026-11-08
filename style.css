@@ -58,7 +58,7 @@ html, body {
 
 /* ---------- Stage ---------- */
 #stage { position: relative; flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
-#table { display: block; border-radius: 16px; box-shadow: 0 0 0 1px rgba(95,211,198,.25), 0 0 44px rgba(95,211,198,.14), 0 0 90px rgba(155,120,224,.12); }
+#table { display: block; }
 
 /* ---------- Screens ---------- */
 .screen { position: absolute; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; padding: 8px max(10px, var(--safe-r)) 8px max(10px, var(--safe-l)); background: var(--ink); overflow: auto; touch-action: pan-y; }

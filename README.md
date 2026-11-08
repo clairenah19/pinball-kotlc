@@ -48,6 +48,8 @@ Every tuning value is in the `CONFIG` object at the top of `game.js`:
 - `modes`: bumper hits that summon the Neverseen, hurry-up time and shots needed, Alicorn and wizard durations, locks needed for multiball.
 - `fx`: global multipliers for screen shake, flashes and particle count.
 
+The 2.5D tilt is `PERSP.top` in `game.js` (1 = flat top-down view, 0.8 = default, lower = stronger perspective). The launch lane has a one-way gate: it swings open for the rising ball and shuts behind it.
+
 Colours come from `CONFIG.palette` (in JS) and the matching CSS variables at the top of `style.css`.
 
 The physics runs at a fixed 240 Hz step (`physics.step`), so four sub-steps per 60 fps frame. At the speed cap (1500 px/s) the ball moves about 6 px per step, less than its 8 px radius, so it cannot tunnel through walls or flippers.
