@@ -713,7 +713,7 @@ function buildBackground() {
     g.lineTo(W, a[1] + 140); g.lineTo(0, a[1] + 140); g.closePath(); g.fill();
   });
   // skyline of crystal towers (lower half, behind the action)
-  const base = 640;
+  const base = 700;
   for (let layer = 0; layer < 2; layer++) {
     for (let x = 14; x < W - 10; x += 26 + rnd() * 20) {
       const h = (layer ? 90 : 140) + rnd() * 120, w = 18 + rnd() * 16;
@@ -721,6 +721,14 @@ function buildBackground() {
       for (let k = 0; k < 4; k++) if (rnd() > 0.5) { g.fillStyle = 'rgba(232,198,106,0.55)'; g.fillRect(x - w / 4 + rnd() * w / 2, base - h * 0.7 + k * 20 * rnd() + 6, 2, 3); }
     }
   }
+  // low fog that melts the skyline into the table, then a soft vignette for depth
+  const fog = g.createLinearGradient(0, 520, 0, 720); fog.addColorStop(0, 'rgba(30,35,96,0)'); fog.addColorStop(1, 'rgba(30,35,96,0.85)');
+  g.fillStyle = fog; g.fillRect(0, 520, W, 220);
+  const vig = g.createRadialGradient(200, 400, 120, 200, 400, 460); vig.addColorStop(0, 'rgba(0,0,0,0)'); vig.addColorStop(1, 'rgba(3,4,16,0.6)');
+  g.fillStyle = vig; g.fillRect(0, 0, W, H);
+  // crescent moon glow behind the title
+  const mg = g.createRadialGradient(200, 40, 2, 200, 40, 70); mg.addColorStop(0, 'rgba(255,243,214,0.35)'); mg.addColorStop(1, 'rgba(255,243,214,0)');
+  g.fillStyle = mg; g.fillRect(100, 0, 200, 110);
   // compass-rose rings in the middle of the playfield
   g.strokeStyle = 'rgba(232,198,106,0.13)'; g.lineWidth = 1.2;
   [60, 92, 128].forEach((r) => { g.beginPath(); g.arc(200, 470, r, 0, TAU); g.stroke(); });
@@ -753,8 +761,15 @@ function buildBackground() {
   g.fillText('LOST CITIES', 200, 60);
   g.fillStyle = 'rgba(221,226,240,0.35)'; g.font = '600 9px Cinzel, Georgia, serif'; g.fillText('P I N B A L L', 200, 74);
   // under-flipper apron
-  g.fillStyle = 'rgba(5,8,23,0.7)'; g.beginPath(); g.moveTo(110, 664); g.lineTo(174, 700); g.lineTo(174, H); g.lineTo(0, H); g.lineTo(0, 570); g.lineTo(8, 570); g.closePath(); g.fill();
-  g.beginPath(); g.moveTo(290, 660); g.lineTo(226, 700); g.lineTo(226, H); g.lineTo(362, H); g.lineTo(362, 570); g.closePath(); g.fill();
+  const ap = g.createLinearGradient(0, 570, 0, H); ap.addColorStop(0, 'rgba(8,10,34,0.9)'); ap.addColorStop(1, '#05061A');
+  g.fillStyle = ap; g.beginPath(); g.moveTo(110, 664); g.lineTo(174, 700); g.lineTo(174, H); g.lineTo(0, H); g.lineTo(0, 570); g.lineTo(8, 570); g.closePath(); g.fill();
+  g.fillStyle = ap; g.beginPath(); g.moveTo(290, 660); g.lineTo(226, 700); g.lineTo(226, H); g.lineTo(362, H); g.lineTo(362, 570); g.closePath(); g.fill();
+  // drain ornament: gold diamond and fine arcs
+  g.strokeStyle = 'rgba(232,198,106,0.5)'; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(200, 716); g.lineTo(212, 732); g.lineTo(200, 748); g.lineTo(188, 732); g.closePath(); g.stroke();
+  g.beginPath(); g.arc(200, 790, 70, Math.PI * 1.15, Math.PI * 1.85); g.stroke();
+  // inlane rivet lights along the guides
+  [[8, 570, 118, 662], [362, 570, 282, 662]].forEach((q) => { for (let i = 1; i < 6; i++) { const t = i / 6; g.fillStyle = 'rgba(95,211,198,0.75)'; g.beginPath(); g.arc(lerp(q[0], q[2], t) + (q[0] < 100 ? 7 : -7), lerp(q[1], q[3], t) + 9, 1.6, 0, TAU); g.fill(); } });
   ballSprite = makeBallSprite();
 }
 
@@ -784,6 +799,7 @@ function drawBumper(b) {
   ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 1;
   for (let i = 0; i < 3; i++) { const ph = (G.time * (0.5 + 0.2 * i) + i * 0.37 + b.x * 0.01) % 1; ctx.beginPath(); ctx.arc(b.x + Math.sin(ph * 6 + i) * r * 0.4, b.y + r * 0.6 - ph * r * 1.2, 1.5 + i * 0.8, 0, TAU); ctx.stroke(); }
   ctx.strokeStyle = 'rgba(221,226,240,0.9)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(b.x, b.y, b.r + 3, 0, TAU); ctx.stroke();
+  ctx.fillStyle = PAL.gold; for (let i = 0; i < 10; i++) { const a = i / 10 * TAU + 0.3; ctx.beginPath(); ctx.arc(b.x + Math.cos(a) * (b.r + 7), b.y + Math.sin(a) * (b.r + 7), 1.4, 0, TAU); ctx.fill(); }
   if (b.ring > 0.02) { ctx.strokeStyle = col; ctx.globalAlpha = b.ring; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(b.x, b.y, b.r + 4 + (1 - b.ring) * 26, 0, TAU); ctx.stroke(); ctx.globalAlpha = 1; }
 }
 function drawOrb(o) {
@@ -794,7 +810,7 @@ function drawOrb(o) {
   ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, TAU); ctx.fill();
   ctx.strokeStyle = lit ? '#fff' : 'rgba(221,226,240,0.6)'; ctx.lineWidth = 1.5; ctx.stroke();
   ctx.fillStyle = lit ? '#2A1F55' : 'rgba(221,226,240,0.7)'; ctx.font = '700 9px Rajdhani, sans-serif'; ctx.textAlign = 'center'; ctx.fillText(o.ch, o.x, o.y + 3);
-  ctx.fillStyle = 'rgba(221,226,240,0.45)'; ctx.font = '600 7px Rajdhani, sans-serif'; ctx.fillText(o.name, o.x, o.y + o.r + 9);
+  ctx.fillStyle = lit ? 'rgba(233,216,255,0.9)' : 'rgba(221,226,240,0.6)'; ctx.font = '700 8px Rajdhani, sans-serif'; ctx.fillText(o.name, o.x, o.y + o.r + 10);
 }
 function drawSpinner() {
   const s = spinner, open = Math.abs(Math.sin(s.angle)), hgt = 3 + 11 * open;
@@ -862,6 +878,7 @@ function drawBall(b) {
   const s = b.st === 'ramp' ? 1.25 : 1, r = BR * s;
   // trail
   for (let i = 0; i < b.trail.length; i++) { const p = b.trail[i], a = (i + 1) / b.trail.length; ctx.globalAlpha = a * 0.35; ctx.fillStyle = G.dark > 0.3 ? PAL.violet : PAL.teal; ctx.beginPath(); ctx.arc(p[0], p[1], BR * (0.3 + 0.6 * a), 0, TAU); ctx.fill(); }
+  if (b.st === 'held') glow(b.x, b.y, 26, PAL.teal, 0.35 + 0.25 * Math.sin(G.time * 8));
   ctx.globalAlpha = 0.35; ctx.fillStyle = '#000'; ctx.beginPath(); ctx.ellipse(b.x + 2, b.y + 3 + (s - 1) * 6, r, r * 0.8, 0, 0, TAU); ctx.fill();
   ctx.globalAlpha = 1; ctx.drawImage(ballSprite, b.x - r, b.y - r, r * 2, r * 2);
 }
@@ -886,6 +903,9 @@ function drawCallout() {
   const t = call.t / call.dur, pop = t < 0.12 ? 0.6 + 0.4 * (t / 0.12) + 0.12 * Math.sin((t / 0.12) * Math.PI) : 1, a = t < 0.1 ? t / 0.1 : t > 0.75 ? Math.max(0, (1 - t) / 0.25) : 1;
   const y = 430 - (R.reduced ? 0 : t * 12);
   ctx.save(); ctx.translate(200, y); ctx.scale(pop, pop);
+  const plate = ctx.createLinearGradient(-170, 0, 170, 0); plate.addColorStop(0, 'rgba(8,10,34,0)'); plate.addColorStop(0.5, 'rgba(8,10,34,0.62)'); plate.addColorStop(1, 'rgba(8,10,34,0)');
+  ctx.globalAlpha = a; ctx.fillStyle = plate; ctx.fillRect(-170, -34, 340, call.sub ? 70 : 52);
+  ctx.strokeStyle = 'rgba(232,198,106,0.55)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-120, -34); ctx.lineTo(120, -34); ctx.moveTo(-120, call.sub ? 36 : 18); ctx.lineTo(120, call.sub ? 36 : 18); ctx.stroke(); ctx.globalAlpha = 1;
   const size = call.text.length > 16 ? 22 : call.text.length > 11 ? 28 : 34;
   drawText(call.text, 0, 0, '700 ' + size, call.color, a);
   if (call.sub) drawText(call.sub.toUpperCase(), 0, 22, '600 13', '#E9D8FF', a * 0.9, 'Rajdhani, sans-serif', 3);
@@ -913,7 +933,7 @@ function draw(dt) {
   // living backdrop: slow aurora shimmer and twinkling stars
   const tt = performance.now() / 1000, shim = R.reduced ? 0 : 1;
   ctx.globalCompositeOperation = 'lighter';
-  for (let i = 0; i < 2; i++) { ctx.globalAlpha = 0.05 + 0.03 * Math.sin(tt * 0.5 + i * 2) * shim; const gr = ctx.createLinearGradient(0, 30, W, 150); gr.addColorStop(0, i ? PAL.violet : PAL.teal); gr.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = gr; ctx.fillRect(Math.sin(tt * 0.3 + i) * 30 * shim - 20, 20 + i * 30, W, 120); }
+  for (let i = 0; i < 2; i++) { ctx.globalAlpha = 0.05 + 0.03 * Math.sin(tt * 0.5 + i * 2) * shim; const gr = ctx.createLinearGradient(0, 30, W, 150); gr.addColorStop(0, i ? PAL.violet : PAL.teal); gr.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = gr; ctx.fillRect(-40, 20 + i * 30, W + 80, 120); }
   ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
   if (!R.reduced) { ctx.fillStyle = '#fff'; for (let i = 0; i < 16; i++) { ctx.globalAlpha = 0.3 + 0.5 * Math.abs(Math.sin(tt * 1.4 + i * 1.7)); ctx.fillRect((i * 97) % W, (i * 53) % 330 + 6, 1.6, 1.6); } ctx.globalAlpha = 1; }
 
@@ -922,6 +942,22 @@ function draw(dt) {
   drawShotLights(); ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = 'source-over';
 
+  // glass sheen sweeping across the table and drifting motes
+  if (!R.reduced) {
+    ctx.globalCompositeOperation = 'lighter'; const sw = ((tt * 0.08) % 1.6 - 0.3) * (W + 200) - 100;
+    const sg = ctx.createLinearGradient(sw - 60, 0, sw + 60, 300); sg.addColorStop(0, 'rgba(255,255,255,0)'); sg.addColorStop(0.5, 'rgba(184,242,234,0.05)'); sg.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.globalAlpha = 1; ctx.fillStyle = sg; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#B8F2EA';
+    for (let i = 0; i < 22; i++) { const x = (i * 83.7 + Math.sin(tt * 0.3 + i) * 14) % W, y = H - ((tt * (6 + (i % 5) * 3) + i * 61) % (H + 20)); ctx.globalAlpha = 0.12 + 0.12 * Math.sin(tt * 2 + i); ctx.fillRect(x, y, 1.6, 1.6); }
+    ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+  }
+  // light flowing along the ramps toward their exits
+  Object.keys(ramps).forEach((k) => {
+    const rp = ramps[k]; const active = G.balls.some((b) => b.st === 'ramp' && b.rp === rp);
+    ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round'; ctx.setLineDash([2, 18]); ctx.lineDashOffset = -tt * (active ? 140 : 40);
+    ctx.strokeStyle = active ? 'rgba(255,255,255,0.95)' : 'rgba(184,242,234,0.55)'; ctx.lineWidth = active ? 5 : 3;
+    ctx.beginPath(); ctx.moveTo(rp.ex, rp.ey); ctx.quadraticCurveTo(rp.p1.x, rp.p1.y, rp.p2.x, rp.p2.y); ctx.stroke(); ctx.restore();
+  });
   crystals.forEach((c) => { c.flash = Math.max(0, c.flash - dt * 3); c.cd -= dt; drawCrystal(c, (tt * 120 + c.note * 50) % 360); });
   orbs.forEach((o) => { o.flash = Math.max(0, o.flash - dt * 3); o.cd -= dt; });
   ctx.globalCompositeOperation = 'lighter'; ctx.globalCompositeOperation = 'source-over';
@@ -954,7 +990,7 @@ function draw(dt) {
     ctx.fillStyle = gr; ctx.fillRect(200 - bw / 2, 80, bw, 620); ctx.globalCompositeOperation = 'source-over';
   }
   drawModeBanner(); drawCallout();
-  popups.forEach((p) => { p.t += dt; ctx.globalAlpha = Math.max(0, 1 - p.t / 0.9); ctx.font = '700 12px Rajdhani, sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = p.color; ctx.fillText(p.text, p.x, p.y - p.t * 28); });
+  popups.forEach((p) => { p.t += dt; ctx.globalAlpha = Math.max(0, 1 - p.t / 0.9); ctx.font = '700 12px Rajdhani, sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(5,6,26,0.8)'; ctx.strokeText(p.text, p.x, p.y - p.t * 28); ctx.fillStyle = p.color; ctx.fillText(p.text, p.x, p.y - p.t * 28); });
   for (let i = popups.length - 1; i >= 0; i--) if (popups[i].t > 0.9) popups.splice(i, 1);
   ctx.globalAlpha = 1;
   if (G.flash > 0.01) { ctx.fillStyle = 'rgba(255,255,255,' + clamp(G.flash * 0.7, 0, 0.7) + ')'; ctx.fillRect(0, 0, W, H); }
@@ -1026,7 +1062,7 @@ function applyPress() {
   lastL = flippers[0].press; lastR = flippers[1].press;
 }
 document.addEventListener('pointerdown', (e) => {
-  if (e.target.closest('button, .screen')) return;
+  if (e.target.closest && e.target.closest('button, .screen')) return;
   SFX.init(); if (G.phase !== 'play') return;
   e.preventDefault(); press.set(e.pointerId, e.clientX < window.innerWidth / 2 ? 'L' : 'R'); applyPress();
 }, { passive: false });
@@ -1034,7 +1070,7 @@ const release = (e) => { if (press.delete(e.pointerId)) applyPress(); };
 document.addEventListener('pointerup', release); document.addEventListener('pointercancel', release);
 document.addEventListener('contextmenu', (e) => e.preventDefault());
 // no scroll / pull-to-refresh / pinch while playing (screens may still scroll)
-document.addEventListener('touchmove', (e) => { if (!e.target.closest('.screen')) e.preventDefault(); }, { passive: false });
+document.addEventListener('touchmove', (e) => { if (!(e.target.closest && e.target.closest('.screen'))) e.preventDefault(); }, { passive: false });
 document.addEventListener('gesturestart', (e) => e.preventDefault());
 document.addEventListener('dblclick', (e) => e.preventDefault());
 window.addEventListener('keydown', (e) => {
