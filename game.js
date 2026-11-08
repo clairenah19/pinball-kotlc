@@ -129,8 +129,8 @@ const ARCH = { cx: 200, cy: 200, r: 192 };
   addSeg(392, 200, 392, 706);                            // right wall (outside of the launch lane)
   addSeg(362, 250, 362, 706);                            // inner lane wall
   addSeg(362, 706, 392, 706);                            // lane floor
-  addSeg(8, 570, 110, 664, { kick: CONFIG.sling.kick, minImpact: CONFIG.sling.minImpact, sling: true, e: 0.35 });   // left guide / slingshot
-  addSeg(362, 570, 290, 660, { kick: CONFIG.sling.kick, minImpact: CONFIG.sling.minImpact, sling: true, e: 0.35 }); // right guide / slingshot
+  addSeg(8, 570, 118, 662, { kick: CONFIG.sling.kick, minImpact: CONFIG.sling.minImpact, sling: true, e: 0.35 });   // left guide / slingshot
+  addSeg(362, 570, 282, 662, { kick: CONFIG.sling.kick, minImpact: CONFIG.sling.minImpact, sling: true, e: 0.35 }); // right guide / slingshot
 })();
 
 const bumpers = [[150, 236], [250, 236], [200, 296]].map((p, i) => ({ x: p[0], y: p[1], r: CONFIG.bumper.radius, flash: 0, ci: i, ring: 0 }));
@@ -610,7 +610,9 @@ function stepBall(b, dt) {
     if (Math.hypot(b.vx, b.vy) < 70) { b.idle += dt; if (b.idle > CONFIG.launch.settleTime) { b.st = 'held'; b.t = 0.35; b.x = CONFIG.launch.x; b.y = CONFIG.launch.y; b.vx = b.vy = 0; b.idle = 0; } } else b.idle = 0;
   } else b.idle = 0;
   // anti-stall: a ball that stops mid table (not on a flipper) gets a nudge
-  if (sp < 8 && b.y < 600) { b.still += dt; if (b.still > 1.6) { b.vx += rand(-200, 200); b.vy -= 260; b.still = 0; } } else b.still = 0;
+  // a ball resting near the flippers while neither is held rolls to the centre drain
+  if (sp < 15 && b.y >= 600 && b.x < 362 && !flippers[0].press && !flippers[1].press) { b.still += dt; if (b.still > 0.8) { b.vx += (b.x < 200 ? 1 : -1) * 120; b.vy += 60; b.still = 0; } }
+  else if (sp < 8 && b.y < 600) { b.still += dt; if (b.still > 1.6) { b.vx += rand(-200, 200); b.vy -= 260; b.still = 0; } } else b.still = 0;
 }
 
 function ballVsBall() {
