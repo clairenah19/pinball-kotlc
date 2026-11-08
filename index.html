@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0B0D26">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Lost Cities Pinball</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ===== HUD: score, balls, multiplier, best, mode pips, buttons ===== -->
+  <header id="hud">
+    <div class="hud-main">
+      <div class="score-wrap">
+        <span class="lbl">Score</span>
+        <span id="score" aria-live="off">0</span>
+      </div>
+      <div id="ballPips" role="img" aria-label="Balls remaining: 3"></div>
+      <div class="hud-btns">
+        <button id="btnMotion" type="button" class="icon-btn" aria-pressed="false" aria-label="Reduced motion off" title="Reduced motion">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M3 12h4l2-6 4 12 2-6h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button id="btnMute" type="button" class="icon-btn" aria-pressed="false" aria-label="Mute sound" title="Mute">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path class="wave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path class="slash" d="M3 3l18 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+        </button>
+        <button id="btnPause" type="button" class="icon-btn" aria-label="Pause game" title="Pause">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="hud-sub">
+      <span>Leap <b id="mult">x1</b></span>
+      <span>Ball <b id="ballNo">1</b></span>
+      <span>Best <b id="best">0</b></span>
+      <span id="modePips" role="img" aria-label="Modes completed: none">
+        <i data-m="leap" title="Light Leap"></i><i data-m="ability" title="Abilities"></i><i data-m="foxfire" title="Foxfire multiball"></i><i data-m="neverseen" title="Neverseen"></i><i data-m="alicorn" title="Alicorn bonus"></i>
+      </span>
+    </div>
+  </header>
+
+  <!-- ===== Table canvas + overlay screens ===== -->
+  <main id="stage">
+    <canvas id="table" aria-label="Pinball table. Hold the left half of the screen for the left paddle and the right half for the right paddle."></canvas>
+    <div id="sr" class="sr-only" aria-live="polite"></div>
+
+    <!-- Title screen: collage grid -->
+    <section id="screenTitle" class="screen" aria-labelledby="ttl">
+      <div class="collage">
+        <div class="tile t-hero">
+          <svg viewBox="0 0 240 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <defs>
+              <linearGradient id="gSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0B0D26"/><stop offset="1" stop-color="#1E2360"/></linearGradient>
+              <linearGradient id="gAur1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5FD3C6" stop-opacity="0"/><stop offset=".5" stop-color="#5FD3C6" stop-opacity=".8"/><stop offset="1" stop-color="#9B78E0" stop-opacity="0"/></linearGradient>
+              <radialGradient id="gHalo"><stop offset="0" stop-color="#5FD3C6" stop-opacity=".55"/><stop offset="1" stop-color="#5FD3C6" stop-opacity="0"/></radialGradient>
+            </defs>
+            <rect width="240" height="200" fill="url(#gSky)"/>
+            <g class="drift"><path d="M-20 90 C 40 30, 90 80, 130 40 S 210 20, 260 60 L 260 100 C 200 70, 150 110, 110 90 S 30 120 -20 130Z" fill="url(#gAur1)"/></g>
+            <g class="drift slow"><path d="M-20 60 C 50 10, 110 50, 160 20 S 230 10, 260 30 L 260 50 C 200 40, 150 70, 100 55 S 20 80 -20 90Z" fill="#9B78E0" opacity=".35"/></g>
+            <circle cx="120" cy="105" r="80" fill="url(#gHalo)"/>
+            <g class="bob">
+              <polygon points="120,35 156,105 120,175 84,105" fill="#5FD3C6"/>
+              <polygon points="120,35 156,105 120,110" fill="#B8F2EA"/>
+              <polygon points="84,105 120,110 120,175" fill="#2E8F86"/>
+              <polygon points="58,80 78,122 58,168 38,122" fill="#9B78E0"/>
+              <polygon points="58,80 78,122 58,126" fill="#C9B4F2"/>
+              <polygon points="186,88 204,126 186,172 168,126" fill="#E8C66A"/>
+              <polygon points="186,88 204,126 186,130" fill="#F6E3A8"/>
+            </g>
+            <g fill="#DDE2F0"><circle cx="20" cy="20" r="1.3"/><circle cx="210" cy="16" r="1.5"/><circle cx="170" cy="40" r="1"/><circle cx="40" cy="50" r="1"/><circle cx="225" cy="70" r="1.2"/></g>
+          </svg>
+          <div class="hero-copy">
+            <small>Keeper of the Lost Cities</small>
+            <h1 id="ttl">Lost Cities<span>Pinball</span></h1>
+          </div>
+          <img class="user-art" src="assets/title.png" alt="" hidden onload="this.hidden=false" onerror="this.remove()">
+        </div>
+
+        <div class="tile t-aurora">
+          <svg viewBox="0 0 120 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <rect width="120" height="100" fill="#0F1D45"/>
+            <g class="drift"><path d="M-10 70 C 20 20, 60 60, 90 25 S 130 30 140 45 L 140 80 C 100 60 60 90 -10 95Z" fill="#5FD3C6" opacity=".7"/></g>
+            <path d="M0 100 V80 L14 74 L26 80 L40 66 L52 78 L66 62 L80 76 L96 68 L120 80 V100Z" fill="#050817"/>
+            <circle cx="20" cy="14" r="1.2" fill="#fff"/><circle cx="90" cy="10" r="1.4" fill="#E8C66A"/>
+          </svg>
+          <span class="chip tilt-l">Foxfire</span>
+        </div>
+
+        <div class="tile t-palette" aria-hidden="true">
+          <i style="background:#1E2360"></i><i style="background:#5FD3C6"></i><i style="background:#E8C66A"></i><i style="background:#9B78E0"></i><i style="background:#DDE2F0"></i>
+        </div>
+
+        <div class="tile t-city">
+          <svg viewBox="0 0 120 200" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+            <rect width="120" height="200" fill="#10153F"/>
+            <circle cx="88" cy="38" r="14" fill="#FFF3D6" opacity=".9"/>
+            <polygon points="8,200 22,90 36,200" fill="#B8F2EA" opacity=".85"/>
+            <polygon points="30,200 52,40 74,200" fill="#DDE2F0" opacity=".9"/>
+            <polygon points="66,200 82,110 98,200" fill="#C9B4F2" opacity=".85"/>
+            <polygon points="90,200 104,70 118,200" fill="#7FE3D6" opacity=".9"/>
+            <rect y="186" width="120" height="14" fill="#1E2360"/>
+          </svg>
+          <span class="chip tilt-r">Black Swan</span>
+        </div>
+
+        <div class="tile t-orbs">
+          <svg viewBox="0 0 200 90" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <rect width="200" height="90" fill="#14173E"/>
+            <g class="bob"><circle cx="40" cy="52" r="24" fill="#9B78E0"/><circle cx="32" cy="44" r="7" fill="#F1E8FF" opacity=".7"/></g>
+            <g class="bob d2"><circle cx="100" cy="48" r="30" fill="#5FD3C6"/><circle cx="90" cy="38" r="9" fill="#E6FFFB" opacity=".7"/></g>
+            <g class="bob d3"><circle cx="162" cy="54" r="22" fill="#E8C66A"/><circle cx="155" cy="46" r="6" fill="#FFF8E2" opacity=".7"/></g>
+          </svg>
+          <span class="chip tilt-l">Elixirs</span>
+        </div>
+
+        <div class="tile t-menu paper">
+          <p class="blurb">Sophie Foster is a telepath who doesn't belong in the human world. Light the crystals, lock the Foxfire tower, and hold off the Neverseen.</p>
+          <div class="btn-row">
+            <button id="btnPlay" type="button" class="btn primary">Play</button>
+            <button id="btnHow" type="button" class="btn ghost">How to play</button>
+          </div>
+          <p class="best-line">Best <b id="titleBest">0</b></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- How to play -->
+    <section id="screenHow" class="screen" hidden aria-labelledby="howTtl" role="dialog" aria-modal="true">
+      <div class="card paper">
+        <h2 id="howTtl">How to play</h2>
+        <ul class="how">
+          <li><b>Paddles</b> Hold the left half of the screen for the left paddle, the right half for the right paddle. Use both thumbs. Desktop: arrows or Z / M.</li>
+          <li><b>Launch</b> The ball launches by itself. No plunger.</li>
+          <li><b>Light Leap</b> Light all five crystals for a beam, a bonus and up to x5 score.</li>
+          <li><b>Abilities</b> Hit every ability orb to unlock a multiplier.</li>
+          <li><b>Foxfire tower</b> Lock three balls for multiball.</li>
+          <li><b>Black Swan</b> A hidden scoop with a clue or a prize.</li>
+          <li><b>Neverseen</b> Lights go violet. Hit the flashing shots before they flee with your points.</li>
+          <li><b>Alicorn wing</b> Spin it enough for a timed bonus.</li>
+          <li><b>Wizard mode</b> Finish every mode to become Keeper of the Lost Cities.</li>
+        </ul>
+        <button id="btnHowClose" type="button" class="btn primary">Got it</button>
+      </div>
+    </section>
+
+    <!-- Pause -->
+    <section id="screenPause" class="screen dim" hidden aria-labelledby="pauseTtl" role="dialog" aria-modal="true">
+      <div class="card paper">
+        <h2 id="pauseTtl">Paused</h2>
+        <div class="btn-row col">
+          <button id="btnResume" type="button" class="btn primary">Resume</button>
+          <button id="btnHowPause" type="button" class="btn ghost">How to play</button>
+          <button id="btnQuit" type="button" class="btn ghost">Quit to title</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Game over: collage grid -->
+    <section id="screenOver" class="screen" hidden aria-labelledby="overTtl">
+      <div class="collage over">
+        <div class="tile o-hero">
+          <svg viewBox="0 0 240 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <rect width="240" height="120" fill="#0B0D26"/>
+            <g class="drift"><path d="M-20 80 C 40 20, 100 70, 150 30 S 230 20, 260 50 L 260 90 C 200 60, 150 100, 100 80 S 30 100 -20 110Z" fill="#9B78E0" opacity=".6"/></g>
+            <polygon points="120,10 140,56 120,102 100,56" fill="#5FD3C6" opacity=".9"/>
+            <polygon points="120,10 140,56 120,60" fill="#B8F2EA"/>
+          </svg>
+          <h2 id="overTtl">Game over</h2>
+          <span class="chip tilt-r" id="newBest" hidden>New best</span>
+        </div>
+        <div class="tile o-score paper"><small>Score</small><b id="overScore">0</b></div>
+        <div class="tile o-best paper"><small>Best</small><b id="overBest">0</b></div>
+        <div class="tile o-modes">
+          <small>Modes cleared</small>
+          <div id="overModes"></div>
+        </div>
+        <div class="tile o-menu paper">
+          <div class="btn-row">
+            <button id="btnAgain" type="button" class="btn primary">Play again</button>
+            <button id="btnMenu" type="button" class="btn ghost">Menu</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+<script src="game.js"></script>
+</body>
+</html>
